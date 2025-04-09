@@ -1,0 +1,32 @@
+# API Framework
+fastapi>=0.110.0
+uvicorn>=0.27.0
+pydantic>=2.5.2
+python-multipart>=0.0.6
+
+# RAG Framework
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.13
+
+# Vector Databases
+qdrant-client>=1.6.3
+faiss-cpu>=1.7.4  # or faiss-gpu if using GPU
+chromadb>=0.4.18  # Alternative vector DB
+
+# Document Processing
+unstructured>=0.10.30
+pypdf>=3.17.1
+python-docx>=0.8.11
+beautifulsoup4>=4.12.2
+
+# LLM Providers
+openai>=1.13.0
+# anthropic>=0.6.0  # Uncomment if using Claude
+
+# Frontend
+streamlit>=1.29.0
+
+# Utils
+python-dotenv>=1.0.0
+tenacity>=8.2.3  # For retrying API calls
