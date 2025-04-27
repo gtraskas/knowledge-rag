@@ -45,26 +45,13 @@ A modern document knowledge base with conversational AI capabilities, built usin
 4. Run the application
 
     ```bash
-    python -m app
+
     ```
 
 ## Project Structure
 
 ```plaintext
-knowledge-rag/
-├── app/
-│   ├── api/            # FastAPI routes
-│   ├── core/           # Core RAG functionality
-│   ├── db/             # Vector DB connections
-│   ├── models/         # Pydantic models
-│   ├── services/       # Business logic
-│   └── main.py         # Application entry point
-├── frontend/           # Streamlit or React frontend
-├── tests/              # Test suite
-├── docs/               # Documentation
-├── .env.example        # Example environment variables
-├── requirements.txt    # Python dependencies
-└── Dockerfile          # Container definition
+
 ```
 
 ## Contributing
