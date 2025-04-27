@@ -154,7 +154,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-API_URL = "http://localhost:8000"
+API_URL = "http://backend:8000"
 CLEAR_URL = f"{API_URL}/clear-all/"
 
 # ---------- Step 1: Upload ----------
