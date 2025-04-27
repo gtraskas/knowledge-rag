@@ -172,3 +172,22 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Add project-specific ignores
+uploaded_files/
+run.sh
+static/favicon.ico
+.env
+
+# macOS system files
+.DS_Store
+
+# Generated files
+*.pdf
+*.txt
+*.html
+*.docx
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
