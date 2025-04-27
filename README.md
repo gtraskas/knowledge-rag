@@ -39,18 +39,19 @@ A modern document knowledge base with conversational AI capabilities, built usin
 3. Set up environment variables
 
     ```bash
-    cp .env.example .env
     # Edit .env with your API keys
     ```
 
 4. Run the application
 
     ```bash
+    cd app
     python -m app.main
     ```
 
 ## Project Structure
 
+```plaintext
 knowledge-rag/
 ├── app/
 │   ├── api/            # FastAPI routes
@@ -65,6 +66,7 @@ knowledge-rag/
 ├── .env.example        # Example environment variables
 ├── requirements.txt    # Python dependencies
 └── Dockerfile          # Container definition
+```
 
 ## Contributing
 
