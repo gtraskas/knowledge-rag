@@ -1,28 +1,13 @@
-# API Framework
-fastapi>=0.110.0
-uvicorn>=0.27.0
-pydantic>=2.5.2
-python-multipart>=0.0.6
-
-# RAG Framework
-langchain>=0.1.0
-langchain-openai>=0.0.5
-langchain-community>=0.0.13
-
-# Vector Database
-faiss-cpu>=1.7.4  # or faiss-gpu if using GPU
-
-# Document Processing
-unstructured>=0.10.30
-pypdf>=3.17.1
-python-docx>=0.8.11
-beautifulsoup4>=4.12.2
-
-# LLM Providers
-openai>=1.13.0
-
-# Frontend
-streamlit>=1.29.0
-
-# Utils
-python-dotenv>=1.0.0
+fastapi
+uvicorn
+python-multipart
+langchain
+langchain-community
+langchain-core
+langchain-openai
+faiss-cpu
+openai
+tiktoken
+numpy
+streamlit
+pypdf
