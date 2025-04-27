@@ -12,7 +12,7 @@ Display search results and generated responses in a more user-friendly format.
 - [x] Add Logging
 Implement logging in the backend to track errors and requests for better debugging and monitoring.
 
-- [ ] Dockerize the Application
+- [x] Dockerize the Application
 Update the Dockerfile to include both the FastAPI backend and Streamlit frontend.
 Create a docker-compose.yml file to manage both services.
 
