@@ -2,15 +2,11 @@ from fastapi import FastAPI, UploadFile, File, HTTPException, Body
 from typing import List
 from pathlib import Path
 from langchain_community.vectorstores import FAISS
-from langchain_community.document_loaders import (
-    PyPDFLoader,
-    UnstructuredWordDocumentLoader,
-    TextLoader,
-    UnstructuredHTMLLoader,
-)
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_openai import OpenAIEmbeddings
 from langchain.chains import RetrievalQA
 from langchain_openai import OpenAI
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
@@ -106,14 +102,8 @@ def vectorize_documents():
             try:
                 if file_path.suffix.lower() == ".pdf":
                     loader = PyPDFLoader(str(file_path))
-                elif file_path.suffix.lower() in [".docx", ".doc"]:
-                    loader = UnstructuredWordDocumentLoader(str(file_path))
-                elif file_path.suffix.lower() == ".txt":
-                    loader = TextLoader(str(file_path))
-                elif file_path.suffix.lower() == ".html":
-                    loader = UnstructuredHTMLLoader(str(file_path))
                 else:
-                    continue  # Skip unsupported file types
+                    continue
 
                 docs = loader.load()
                 documents.extend(docs)
@@ -124,8 +114,13 @@ def vectorize_documents():
     if not documents:
         raise HTTPException(status_code=400, detail="No documents found to vectorize.")
 
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    split_docs = []
+    for doc in documents:
+        split_docs.extend(text_splitter.split_documents([doc]))
+
     embeddings = OpenAIEmbeddings()
-    vector_store = FAISS.from_documents(documents, embeddings)
+    vector_store = FAISS.from_documents(split_docs, embeddings)
     vector_store.save_local(VECTOR_STORE_PATH)
 
     retriever = vector_store.as_retriever(search_kwargs={"k": 5})
