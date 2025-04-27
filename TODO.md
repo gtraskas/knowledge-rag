@@ -1,6 +1,6 @@
 # To Do List
 
-- [ ] Testing and Debugging
+- [x] Testing and Debugging
 Test the /search/ and /generate/ endpoints thoroughly to ensure they work as expected.
 Debug any remaining issues, such as edge cases for different file types or invalid inputs.
 
