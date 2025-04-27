@@ -14,6 +14,7 @@ from langchain_openai import OpenAI
 from fastapi.staticfiles import StaticFiles
 import os
 from dotenv import load_dotenv
+import shutil
 
 # Load environment variables
 load_dotenv()
@@ -28,8 +29,55 @@ app = FastAPI()
 UPLOAD_FOLDER = Path("uploaded_files")
 UPLOAD_FOLDER.mkdir(exist_ok=True)
 
+VECTOR_STORE_PATH = "vector_store.faiss"
+
 vector_store = None
 qa_chain = None
+
+
+def remove_pycache_and_vector_store():
+    # Remove vector store
+    if Path(VECTOR_STORE_PATH).exists():
+        shutil.rmtree(VECTOR_STORE_PATH, ignore_errors=True)
+    # Remove uploaded files
+    if UPLOAD_FOLDER.exists():
+        for file in UPLOAD_FOLDER.iterdir():
+            if file.is_file():
+                file.unlink()
+    # Remove __pycache__ directories
+    for root, dirs, files in os.walk("."):
+        for dir_name in dirs:
+            if dir_name == "__pycache__":
+                shutil.rmtree(os.path.join(root, dir_name), ignore_errors=True)
+
+
+def load_vector_store():
+    global vector_store, qa_chain
+    if Path(VECTOR_STORE_PATH).exists():
+        embeddings = OpenAIEmbeddings()
+        vector_store = FAISS.load_local(
+            VECTOR_STORE_PATH,
+            embeddings,
+            allow_dangerous_deserialization=True
+        )
+        retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+        qa_chain = RetrievalQA.from_chain_type(
+            llm=OpenAI(),
+            retriever=retriever
+        )
+    else:
+        vector_store = None
+        qa_chain = None
+
+
+# --- On startup, remove all previous files for a fresh start ---
+remove_pycache_and_vector_store()
+
+
+@app.on_event("startup")
+def on_startup():
+    remove_pycache_and_vector_store()
+    load_vector_store()
 
 
 @app.get("/")
@@ -78,6 +126,7 @@ def vectorize_documents():
 
     embeddings = OpenAIEmbeddings()
     vector_store = FAISS.from_documents(documents, embeddings)
+    vector_store.save_local(VECTOR_STORE_PATH)
 
     retriever = vector_store.as_retriever(search_kwargs={"k": 5})
     qa_chain = RetrievalQA.from_chain_type(
@@ -89,11 +138,11 @@ def vectorize_documents():
 
 @app.post("/search/")
 def search_documents(query: str = Body(..., embed=True)):
+    load_vector_store()
     if vector_store is None:
         raise HTTPException(status_code=400, detail="Vector store not initialized. Run /vectorize/ first.")
     results = vector_store.similarity_search(query, k=5)
     return {
-        "query": query,
         "results": [
             {
                 "content": doc.page_content,
@@ -106,10 +155,23 @@ def search_documents(query: str = Body(..., embed=True)):
 
 @app.post("/generate/")
 def generate_response(query: str = Body(..., embed=True)):
+    load_vector_store()
     if qa_chain is None:
         raise HTTPException(status_code=400, detail="QA chain not initialized. Run /vectorize/ first.")
     response = qa_chain.invoke(query)
-    return {"query": query, "response": response}
+    # If response is a dict (common for some chains), get the answer text
+    if isinstance(response, dict):
+        answer = response.get("result", "") or response.get("output_text", "")
+    else:
+        answer = response
+    return {"response": answer}
+
+
+@app.post("/clear-all/")
+def clear_all():
+    remove_pycache_and_vector_store()
+    load_vector_store()
+    return {"message": "All uploaded documents and vector store have been removed."}
 
 
 # Mount the static files directory for serving favicon
