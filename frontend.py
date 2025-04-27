@@ -8,6 +8,7 @@ st.set_page_config(
     layout="centered"
 )
 
+# ---------- Styling ----------
 st.markdown(
     """
     <style>
@@ -86,16 +87,38 @@ st.markdown(
         font-size: 1.06em;
         color: #1a3050;
     }
+    .section-header {
+        margin-top: 2.2em;
+        margin-bottom: 0.25em;
+        color: #0072ff;
+        font-size: 1.35em;
+        font-weight: 650;
+    }
+    .order-badge {
+        display: inline-block;
+        background: #4f8cff;
+        color: #fff;
+        border-radius: 50%;
+        width: 2em;
+        height: 2em;
+        font-size: 1.05em;
+        font-weight: bold;
+        text-align: center;
+        line-height: 2em;
+        margin-right: 0.7em;
+        margin-bottom: 0.1em;
+        vertical-align: middle;
+    }
     </style>
     """,
     unsafe_allow_html=True
 )
 
+# ---------- Header and Description ----------
 st.markdown(
     '<div class="custom-header">KnowledgeRAG</div>',
     unsafe_allow_html=True
 )
-
 st.markdown(
     """<div class="desc">
     KnowledgeRAG lets you ask questions about your own PDF documents!<br>
@@ -108,7 +131,6 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-
 st.markdown(
     """
     <div class="tips-box">
@@ -132,11 +154,17 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 API_URL = "http://localhost:8000"
 CLEAR_URL = f"{API_URL}/clear-all/"
 
-st.header("1. Upload Your Documents")
+# ---------- Step 1: Upload ----------
+st.markdown(
+    '<div class="section-header">'
+    '<span class="order-badge">1</span>Upload Your Documents'
+    '</div>',
+    unsafe_allow_html=True
+)
+
 st.markdown(
     "Choose PDF files you want to ask questions about. "
     "After uploading, click <b>Vectorize</b> to let the system learn from them.",
@@ -152,7 +180,13 @@ if uploaded_files:
     for file in uploaded_files:
         st.markdown(f'<div class="uploaded-file">{file.name}</div>', unsafe_allow_html=True)
 
-if st.button("Upload Files", help="Upload the selected files to the server."):
+upload_col, vector_col = st.columns([1, 1])
+with upload_col:
+    upload_clicked = st.button("Upload Files", help="Upload the selected files to the server.")
+with vector_col:
+    vectorize_clicked = st.button("Vectorize", help="Process your uploaded files for Q&A.")
+
+if upload_clicked:
     if uploaded_files:
         files = [("files", (file.name, file, file.type)) for file in uploaded_files]
         with st.spinner("Uploading files..."):
@@ -164,12 +198,7 @@ if st.button("Upload Files", help="Upload the selected files to the server."):
     else:
         st.warning("Please select at least one file.")
 
-st.header("2. Vectorize (Learn from your documents)")
-st.markdown(
-    "This step lets the system analyze your files so you can search & ask questions about their content.",
-    unsafe_allow_html=True
-)
-if st.button("Vectorize", help="Process your uploaded files for Q&A."):
+if vectorize_clicked:
     with st.spinner("Vectorizing documents..."):
         response = requests.post(f"{API_URL}/vectorize/")
     if response.status_code == 200:
@@ -177,19 +206,25 @@ if st.button("Vectorize", help="Process your uploaded files for Q&A."):
     else:
         st.error(response.json().get("detail") or "Vectorization failed. Please upload documents first.")
 
-st.header("3. Ask Questions About Your Documents")
+# ---------- Step 2: Ask ----------
 st.markdown(
-    "Type a question about the content of your uploaded files. Click <b>Search</b> to get relevant passages. "
-    "Then use <b>Generate</b> for a smart answer based on your question and the documents.",
+    '<div class="section-header">'
+    '<span class="order-badge">2</span>Ask Questions About Your Documents'
+    '</div>',
+    unsafe_allow_html=True
+)
+st.markdown(
+    "Type a question about your uploaded files. Click <b>Search</b> to preview relevant passages. "
+    "Then click <b>Generate Answer</b> for a smart, synthesized answer based on your question and the documents.",
     unsafe_allow_html=True
 )
 query = st.text_input("Ask a question (e.g., What is the main conclusion of my report?)")
 
-col1, col2 = st.columns(2)
-with col1:
-    search_btn = st.button("Search", help="Find relevant info from your documents.")
-with col2:
-    generate_btn = st.button("Generate", help="Get a smart answer to your question.")
+search_col, generate_col = st.columns([1, 1])
+with search_col:
+    search_btn = st.button("Search", key="search_btn", help="Preview relevant info from your documents.")
+with generate_col:
+    generate_btn = st.button("Generate Answer", key="generate_btn", help="Get a smart answer to your question.")
 
 if search_btn:
     if query:
@@ -218,7 +253,6 @@ if generate_btn:
             if answer:
                 st.subheader("Your Answer")
                 st.markdown(f'<div class="result-box">{answer}</div>', unsafe_allow_html=True)
-                # Optionally, show sources for transparency
                 sources = generated_response.get("sources", [])
                 if sources:
                     st.markdown(
@@ -233,8 +267,14 @@ if generate_btn:
     else:
         st.warning("Please enter a question before generating an answer.")
 
-st.markdown("---")
-st.header("Start Over / Remove All Documents")
+# ---------- Step 3: Clear All ----------
+st.markdown(
+    '<div class="section-header">'
+    '<span class="order-badge">3</span>Start Over / Remove All Documents'
+    '</div>',
+    unsafe_allow_html=True
+)
+
 st.markdown(
     "Click the button below to remove all uploaded documents and reset the system. "
     "You can then start fresh with new files.",
