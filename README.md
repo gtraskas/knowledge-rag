@@ -98,3 +98,24 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Running with Docker
+
+To run the application using Docker:
+
+1. Build and start the containers:
+
+    ```bash
+    docker-compose up --build
+    ```
+
+2. Access the application:
+
+    - **Backend**: [http://localhost:8000](http://localhost:8000)
+    - **Frontend**: [http://localhost:8501](http://localhost:8501)
+
+3. Stop the containers:
+
+    ```bash
+    docker-compose down
+    ```
