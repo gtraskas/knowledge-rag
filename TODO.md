@@ -9,7 +9,7 @@ Improve the Streamlit interface for better user experience:
 Add progress indicators for long-running tasks like vectorization.
 Display search results and generated responses in a more user-friendly format.
 
-- [ ] Add Logging
+- [x] Add Logging
 Implement logging in the backend to track errors and requests for better debugging and monitoring.
 
 - [ ] Dockerize the Application
@@ -20,7 +20,7 @@ Create a docker-compose.yml file to manage both services.
 Deploy the application to a cloud platform like AWS, GCP, or Azure.
 Alternatively, use a container orchestration platform like Kubernetes.
 
-- [ ] Documentation
+- [x] Documentation
 Update the README.md with detailed instructions on how to set up, run, and use the application.
 Include examples of supported file types and queries.
 
