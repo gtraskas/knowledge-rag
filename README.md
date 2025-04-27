@@ -45,8 +45,7 @@ A modern document knowledge base with conversational AI capabilities, built usin
 4. Run the application
 
     ```bash
-    cd app
-    python -m app.main
+    python -m app
     ```
 
 ## Project Structure
