@@ -2,14 +2,16 @@ import streamlit as st
 import requests
 
 
-# ---------- Custom Styles ----------
-st.set_page_config(page_title="KnowledgeRAG", page_icon=":books:", layout="centered")
+st.set_page_config(
+    page_title="KnowledgeRAG",
+    page_icon=":books:",
+    layout="centered"
+)
 
-st.markdown("""
+st.markdown(
+    """
     <style>
-    .main {
-        background-color: #f5f7fa;
-    }
+    .main { background-color: #f5f7fa; }
     .stButton>button {
         color: white;
         background: linear-gradient(90deg, #4f8cff, #0072ff 70%);
@@ -75,28 +77,65 @@ st.markdown("""
     .clear-btn>button:hover {
         background: #d13030 !important;
     }
+    .tips-box {
+        background: #eaf1fb;
+        border-left: 6px solid #0072ff;
+        border-radius: 7px;
+        padding: 1em 1.2em 1em 1.2em;
+        margin-bottom: 1.2em;
+        font-size: 1.06em;
+        color: #1a3050;
+    }
     </style>
-""", unsafe_allow_html=True)
-
-# ---------- App Title & Description ----------
-st.markdown('<div class="custom-header">KnowledgeRAG</div>', unsafe_allow_html=True)
-st.markdown(
-    '<div class="desc">'
-    'KnowledgeRAG lets you ask questions about your own PDF documents! <br>'
-    'Upload files, let the system "learn" from them, and then ask anything in natural language. <br>'
-    '<b>What is <span style="color:#0072ff;">RAG</span>?</b> <br>'
-    '<b>RAG</b> stands for <b>Retrieval-Augmented Generation</b>: it means the AI can search through your documents '
-    'to find the most relevant information, and then generate a smart answer just for you.<br>'
-    'This lets you quickly find answers or summaries from your files—no technical knowledge needed!'
-    '</div>',
-    unsafe_allow_html=True,
+    """,
+    unsafe_allow_html=True
 )
 
-# ---------- Helper API endpoints ----------
+st.markdown(
+    '<div class="custom-header">KnowledgeRAG</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """<div class="desc">
+    KnowledgeRAG lets you ask questions about your own PDF documents!<br>
+    Upload files, let the system "learn" from them, and then ask anything in natural language.<br>
+    <b>What is <span style="color:#0072ff;">RAG</span>?</b><br>
+    <b>RAG</b> stands for <b>Retrieval-Augmented Generation</b>: it means the AI can search through your documents
+    to find the most relevant information, and then generate a smart answer just for you.<br>
+    This lets you quickly find answers or summaries from your files—no technical knowledge needed!
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    """
+    <div class="tips-box">
+    <b>Best Practices for Great Results:</b>
+    <ul>
+        <li><b>Upload only relevant files</b> for your current session. Remove old files with "Clear All"
+        before starting a new project.</li>
+        <li><b>Use clear, descriptive file names</b> to help organize your uploads.</li>
+        <li><b>Prefer smaller or focused documents</b> over huge ones. If your documents are very large,
+        consider splitting them into separate files for more accurate answers.</li>
+        <li>When asking a question, <b>be as specific as possible</b>. For example:
+        "What is the conclusion in <i>report_A.pdf</i>?" or "Summarize section 3 of the user manual."</li>
+        <li>If you want answers from <b>multiple files</b>, use a query that clearly references both,
+        or ask a question that would reasonably require information from both documents.</li>
+        <li>If your files have very similar content, the answer may focus on the most relevant one.</li>
+        <li>For best performance, avoid uploading files with the same name, even if their content differs.</li>
+        <li>Click "Clear All Documents" before uploading a new batch of files for a fresh session.</li>
+    </ul>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
 API_URL = "http://localhost:8000"
 CLEAR_URL = f"{API_URL}/clear-all/"
 
-# ---------- Upload Section ----------
 st.header("1. Upload Your Documents")
 st.markdown(
     "Choose PDF files you want to ask questions about. "
@@ -125,8 +164,7 @@ if st.button("Upload Files", help="Upload the selected files to the server."):
     else:
         st.warning("Please select at least one file.")
 
-# ---------- Vectorize Section ----------
-st.header("2. Learn from your documents (Vectorize)")
+st.header("2. Vectorize (Learn from your documents)")
 st.markdown(
     "This step lets the system analyze your files so you can search & ask questions about their content.",
     unsafe_allow_html=True
@@ -139,7 +177,6 @@ if st.button("Vectorize", help="Process your uploaded files for Q&A."):
     else:
         st.error(response.json().get("detail") or "Vectorization failed. Please upload documents first.")
 
-# ---------- Search Section ----------
 st.header("3. Ask Questions About Your Documents")
 st.markdown(
     "Type a question about the content of your uploaded files. Click <b>Search</b> to get relevant passages. "
@@ -173,20 +210,29 @@ if generate_btn:
     if query:
         with st.spinner("Generating answer..."):
             response = requests.post(f"{API_URL}/generate/", json={"query": query})
-        generated_response = response.json()
-        answer = generated_response.get("response", "")
-        # If the answer is in a dict (as in some LLM chains), get the answer text
-        if isinstance(answer, dict):
-            answer = answer.get("result", "") or answer.get("output_text", "")
-        if answer:
-            st.subheader("Your Answer")
-            st.markdown(f'<div class="result-box">{answer}</div>', unsafe_allow_html=True)
-        else:
-            st.info("No answer generated.")
+        try:
+            generated_response = response.json()
+            answer = generated_response.get("response", "")
+            if isinstance(answer, dict):
+                answer = answer.get("result", "") or answer.get("output_text", "")
+            if answer:
+                st.subheader("Your Answer")
+                st.markdown(f'<div class="result-box">{answer}</div>', unsafe_allow_html=True)
+                # Optionally, show sources for transparency
+                sources = generated_response.get("sources", [])
+                if sources:
+                    st.markdown(
+                        "<div style='color:#4f8cff;font-size:0.98em; margin-top:-0.5em;'>Sources used: " +
+                        ", ".join([f"<i>{src}</i>" for src in set(sources)]) +
+                        "</div>", unsafe_allow_html=True
+                    )
+            else:
+                st.info("No answer generated.")
+        except Exception:
+            st.error("An error occurred. Please try a shorter question or fewer documents.")
     else:
         st.warning("Please enter a question before generating an answer.")
 
-# ---------- Clear Documents Section ----------
 st.markdown("---")
 st.header("Start Over / Remove All Documents")
 st.markdown(
